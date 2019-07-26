@@ -1,5 +1,6 @@
 import com.alibaba.fastjson.JSONObject;
 import org.apache.http.Header;
+import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
@@ -13,6 +14,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.StandardHttpRequestRetryHandler;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -27,20 +29,20 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class HttpUtil {
 
-    private static RequestConfig reqConf = null;
+    private static RequestConfig reqConf ;
 //    private static StandardHttpRequestRetryHandler standardHandler = null;
 
     static {
-//        HttpHost proxy=new HttpHost("68.183.99.96", 8080);
+        //http://www.89ip.cn/index.html
+        HttpHost proxy=new HttpHost("114.55.236.62",3128);
         reqConf = RequestConfig.custom()
                 .setSocketTimeout(20000)
                 .setConnectTimeout(20000)
                 .setConnectionRequestTimeout(20000)
-//                .setRedirectsEnabled(false)
-//                .setMaxRedirects(0)
-//                .setProxy(proxy)
+                .setRedirectsEnabled(false)
+                .setMaxRedirects(0)
+                .setProxy(proxy)
                 .build();
-//        standardHandler = new StandardHttpRequestRetryHandler(3, true);
     }
 
 
