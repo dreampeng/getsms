@@ -34,14 +34,14 @@ public class HttpUtil {
 
     static {
         //http://www.89ip.cn/index.html
-        HttpHost proxy=new HttpHost("114.55.236.62",3128);
+//        HttpHost proxy=new HttpHost("114.55.236.62",3128);
         reqConf = RequestConfig.custom()
                 .setSocketTimeout(20000)
                 .setConnectTimeout(20000)
                 .setConnectionRequestTimeout(20000)
-                .setRedirectsEnabled(false)
-                .setMaxRedirects(0)
-                .setProxy(proxy)
+//                .setRedirectsEnabled(false)
+//                .setMaxRedirects(0)
+//                .setProxy(proxy)
                 .build();
     }
 
