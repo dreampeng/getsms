@@ -35,31 +35,44 @@ public class GetSms {
         }
     }
 
-    private static JSONObject getTelRef(String index) throws Exception {
-        String html = HttpUtil.doGet("https://shouduanxin.com/zh-cn/index_" + index, null, null, context);
+    private static JSONObject getTelRef(String url, String listCssQuery, String phoneCssQuery) throws Exception {
+        String html = HttpUtil.doGet(url, null, null, context);
         Document doc = Jsoup.parse(html);
-        Elements list = doc.getElementsByClass("sms-number-list row show-grid container");
+        Elements list = doc.select(listCssQuery);
         JSONObject telNumAndRef = new JSONObject();
         for (Element element : list) {
-            Elements temps = element.getElementsByTag("h3");
-            if (temps.size() != 1 || temps.get(0).getElementsByTag("small").size() > 0) {
-                continue;
-            }
-            telNumAndRef.put(temps.get(0).html(), element.getElementsByTag("a").get(0).attributes().get("href"));
+            String href = element.getElementsByTag("a").get(0).attr("href");
+            String phone = element.select(phoneCssQuery).get(0).text().replaceAll(" ", "");
+            telNumAndRef.put(phone, href);
         }
         return telNumAndRef;
+    }
+
+    private static List<String> getNewSms(String ref, String listCssQuery, List<String> oldSMS) throws Exception {
+        String html = HttpUtil.doGet(ref, null, null, context);
+        List<String> newSMS = new ArrayList<>();
+        Document doc = Jsoup.parse(html);
+        Elements list = doc.select(".layui-table tbody tr");
+        for (Element element : list) {
+            String content = element.text();
+            if (!oldSMS.contains(content)) {
+                newSMS.add(content);
+            }
+        }
+        return newSMS;
     }
 
     public static void main(String[] args) throws Exception {
         System.out.print("正在获取");
         StringBuilder tips = new StringBuilder("以下是获取到的电话号码");
         JSONObject telNumAndRef = new JSONObject();
-        telNumAndRef.putAll(getTelRef("1"));
-        System.out.print(".");
-        telNumAndRef.putAll(getTelRef("2"));
-        System.out.print(".");
-        telNumAndRef.putAll(getTelRef("3"));
-        System.out.println(".");
+        String listCssQuery = ".main .layui-card .layuiadmin-card-list";
+        String phoneCssQuery = "a";
+        for (int i = 0; i < 3; i++) {
+            System.out.print(".");
+            String url = "https://www.yinsixiaohao.com/dl/" + (i + 1) + ".html";
+            telNumAndRef.putAll(getTelRef(url, listCssQuery, phoneCssQuery));
+        }
         telNumAndRef.forEach((k, v) -> tips.append("\n\t").append(k));
         tips.append("\n请在以上电话号码中选择:");
         String ref;
@@ -67,20 +80,16 @@ public class GetSms {
             String input = scanner(tips.toString()).toUpperCase();
             ref = telNumAndRef.getString(input);
         } while (ref == null);
-        List<String> contents = new ArrayList<>();
+        List<String> oldSMS = new ArrayList<>();
+        listCssQuery = ".layui-table tbody tr td:eq(1)";
+        System.out.println("正在读取短信...");
         while (true) {
-            String html = HttpUtil.doGet("https://shouduanxin.com" + ref, null, null, context);
-            Document doc = Jsoup.parse(html);
-            Elements list = doc.select(".container-fluid.sms_content tbody tr");
-            for (Element element : list) {
-                Elements temps = element.getElementsByTag("td");
-                String content = temps.get(2).html();
-                if (!contents.contains(content)) {
-                    contents.add(temps.get(2).html());
-                    System.out.println(content);
-                }
+            List<String> newSMS = getNewSms(ref, listCssQuery, oldSMS);
+            oldSMS.addAll(newSMS);
+            for (int i = newSMS.size() -1 ; i >= 0 ; i--) {
+                System.out.println(newSMS.get(i));
             }
-            Thread.sleep(5000);
+            scanner("请在发送短信后输入\"1\":");
         }
     }
 }
