@@ -52,9 +52,12 @@ public class GetSms {
         String html = HttpUtil.doGet(ref, null, null, context);
         List<String> newSMS = new ArrayList<>();
         Document doc = Jsoup.parse(html);
-        Elements list = doc.select(".layui-table tbody tr");
+        Elements list = doc.select(listCssQuery);
         for (Element element : list) {
             String content = element.text();
+            if ("超级云短信".equals(content)) {
+                continue;
+            }
             if (!oldSMS.contains(content)) {
                 newSMS.add(content);
             }
@@ -66,11 +69,12 @@ public class GetSms {
         System.out.print("正在获取");
         StringBuilder tips = new StringBuilder("以下是获取到的电话号码");
         JSONObject telNumAndRef = new JSONObject();
-        String listCssQuery = ".main .layui-card .layuiadmin-card-list";
+        String listCssQuery = ".phone_item";
         String phoneCssQuery = "a";
-        for (int i = 0; i < 3; i++) {
+        String totalUrl = "http://www.bfkdim.com";
+        for (int i = 0; i < 1; i++) {
             System.out.print(".");
-            String url = "https://www.yinsixiaohao.com/dl/" + (i + 1) + ".html";
+            String url = totalUrl + "/?page=" + i;
             telNumAndRef.putAll(getTelRef(url, listCssQuery, phoneCssQuery));
         }
         telNumAndRef.forEach((k, v) -> tips.append("\n\t").append(k));
@@ -81,12 +85,12 @@ public class GetSms {
             ref = telNumAndRef.getString(input);
         } while (ref == null);
         List<String> oldSMS = new ArrayList<>();
-        listCssQuery = ".layui-table tbody tr td:eq(1)";
+        listCssQuery = ".panel-footer a";
         System.out.println("正在读取短信...");
         while (true) {
-            List<String> newSMS = getNewSms(ref, listCssQuery, oldSMS);
+            List<String> newSMS = getNewSms(totalUrl + ref, listCssQuery, oldSMS);
             oldSMS.addAll(newSMS);
-            for (int i = newSMS.size() -1 ; i >= 0 ; i--) {
+            for (int i = newSMS.size() - 1; i >= 0; i--) {
                 System.out.println(newSMS.get(i));
             }
             scanner("请在发送短信后输入\"1\":");

@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class HttpUtil {
 
-    private static RequestConfig reqConf ;
+    private static RequestConfig reqConf;
 //    private static StandardHttpRequestRetryHandler standardHandler = null;
 
     static {
