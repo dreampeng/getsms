@@ -104,7 +104,9 @@ public class HttpUtil {
         } catch (Exception e) {
             throw e;
         } finally {
-            response.close();
+            if (response!=null) {
+                response.close();
+            }
             httpclient.close();
         }
         return resultString;
